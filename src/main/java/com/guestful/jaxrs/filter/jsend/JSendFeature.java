@@ -61,23 +61,25 @@ public class JSendFeature implements DynamicFeature, Feature {
                 produces = resourceInfo.getResourceClass().getAnnotation(Produces.class);
             }
             if (produces == null || produces.value().length == 0) {
-                context.register(JsendFilter.class);
+                context.register(new JsendFilter(jsend));
             } else {
+                final Jsend finalJsend = jsend;
                 Arrays.asList(produces.value())
                     .stream()
                     .filter(ct -> MediaType.APPLICATION_JSON_TYPE.isCompatible(MediaType.valueOf(ct)))
                     .findFirst()
-                    .ifPresent(s -> context.register(JsendFilter.class));
+                    .ifPresent(s -> context.register(new JsendFilter(finalJsend)));
             }
         }
     }
 
-    static Response wrapResponse(ContainerRequestContext request, Response response, Throwable e) {
+    static Response wrapResponse(ContainerRequestContext request, Response response, Throwable e, Jsend options) {
         JSendBody entity = new JSendBody();
         entity.getMeta().setStatus(response.getStatus());
         Family family = Response.Status.Family.familyOf(response.getStatus());
         boolean error = family == Family.CLIENT_ERROR || family == Family.SERVER_ERROR;
         Object data = response.getEntity();
+
         if (error || e != null) {
             entity.setError(new JSendError());
             entity.getError().setType(ERROR_TYPES.getOrDefault(response.getStatus(), "other"));
@@ -90,9 +92,18 @@ public class JSendFeature implements DynamicFeature, Feature {
         } else if (response.getStatus() == Response.Status.OK.getStatusCode() || data != null) {
             entity.setData(data);
         }
+
+        if(entity.getError() == null && options != null && options.deprecated().length() > 0) {
+            entity.setError(new JSendError());
+            entity.getError().setType("deprecated");
+            entity.getError().setMessage(options.deprecated());
+        }
+
         Object ct = response.getMetadata().getFirst(HttpHeaders.CONTENT_TYPE);
         MediaType type = ct == null ? null : MediaType.valueOf(ct.toString());
+
         request.setProperty(WRAPPED, true);
+
         return Response.fromResponse(response)
             .status(response.getStatus() == Response.Status.NO_CONTENT.getStatusCode() ? Response.Status.OK.getStatusCode() : response.getStatus())
             .type(type != null && MediaType.APPLICATION_JSON_TYPE.isCompatible(type) ? type : JSON_UTF_8)

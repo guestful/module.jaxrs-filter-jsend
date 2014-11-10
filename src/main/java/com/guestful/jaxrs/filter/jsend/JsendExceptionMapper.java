@@ -61,13 +61,13 @@ public class JsendExceptionMapper implements ExceptionMapper<Throwable> {
             MediaType mt = ct == null ? null : MediaType.valueOf(ct.toString());
             Throwable t = e.getCause() == null ? e : e.getCause();
             response = infos != null && (mt == null || MediaType.APPLICATION_JSON_TYPE.isCompatible(mt)) ?
-                JSendFeature.wrapResponse(requestProvider.get(), response, t) :
+                JSendFeature.wrapResponse(requestProvider.get(), response, t, null) :
                 response;
             logStackTrace = e.getCause() != null;
 
         } else {
             level = Level.SEVERE;
-            response = JSendFeature.wrapResponse(requestProvider.get(), Response.status(Response.Status.INTERNAL_SERVER_ERROR).build(), e);
+            response = JSendFeature.wrapResponse(requestProvider.get(), Response.status(Response.Status.INTERNAL_SERVER_ERROR).build(), e, null);
         }
 
         Logger logger = Logger.getLogger(e.getClass().getName());

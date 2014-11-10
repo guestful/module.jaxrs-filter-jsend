@@ -31,6 +31,12 @@ import java.io.IOException;
 @Priority(Priorities.ENTITY_CODER)
 public class JsendFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
+    private final Jsend options;
+
+    public JsendFilter(Jsend options) {
+        this.options = options;
+    }
+
     @Override
     public void filter(ContainerRequestContext request) throws IOException {
         request.setProperty(RequestInfo.class.getName(), new RequestInfo(request));
@@ -42,7 +48,7 @@ public class JsendFilter implements ContainerRequestFilter, ContainerResponseFil
             Response resp = JSendFeature.wrapResponse(request, Response.status(response.getStatus())
                 .type(response.getMediaType())
                 .entity(response.getEntity())
-                .build(), null);
+                .build(), null, options);
             response.setStatus(resp.getStatus());
             response.setEntity(resp.getEntity(), null, resp.getMediaType());
         }
