@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="jaxrs-filter-jsend : JAX-RX Filter Jsend">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>jaxrs-filter-jsend</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/guestful/module.jaxrs-filter-jsend">View on GitHub</a>
+
+          <h1 id="project_title">jaxrs-filter-jsend</h1>
+          <h2 id="project_tagline">JAX-RX Filter Jsend</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/guestful/module.jaxrs-filter-jsend/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/guestful/module.jaxrs-filter-jsend/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a id="guestful--module--jax-rx-filter-jsend" class="anchor" href="#guestful--module--jax-rx-filter-jsend" aria-hidden="true"><span class="octicon octicon-link"></span></a>Guestful :: Module :: JAX-RX Filter Jsend</h1>
+
+<p>Add in your POM:</p>
+
+<pre><code>&lt;repositories&gt;
+    &lt;repository&gt;
+        &lt;id&gt;bintray&lt;/id&gt;
+        &lt;url&gt;http://dl.bintray.com/guestful/maven&lt;/url&gt;
+    &lt;/repository&gt;
+&lt;/repositories&gt;
+</code></pre>
+
+<p>and</p>
+
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;com.guestful.module&lt;/groupId&gt;
+    &lt;artifactId&gt;guestful.module.jaxrs-filter-jsend&lt;/artifactId&gt;
+    &lt;version&gt;?&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+
+<p>Checkout last version <a href="https://bintray.com/guestful/maven/guestful.module.jaxrs-filter-jsend/view">here</a></p>
+
+<p><a href="https://drone.io/github.com/guestful/module.jaxrs-filter-jsend/latest"><img src="https://drone.io/github.com/guestful/module.jaxrs-filter-jsend/status.png" alt="Build Status"></a></p>
+
+<h2>
+<a id="setup" class="anchor" href="#setup" aria-hidden="true"><span class="octicon octicon-link"></span></a>Setup</h2>
+
+<p>In your resouce config:</p>
+
+<pre><code>registerClasses(JSendFeature)
+</code></pre>
+
+<p>In your resources, add <code>@Jsend</code> annotation like this.</p>
+
+<pre><code>@GET
+@Path("version")
+@Produces("application/json; charset=utf-8")
+@Jsend
+Map getVersion() {
+    return [
+        version: Env.VERSION
+    ]
+}
+</code></pre>
+
+<h2>
+<a id="responses--errors" class="anchor" href="#responses--errors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Responses &amp; Errors</h2>
+
+<p>All responses will look roughly like this:</p>
+
+<pre><code>{
+    "meta": {
+        "status": 200
+    },
+    "error": {
+        "type": "&lt;type&gt;",
+        "data": {...},
+        "message": "an optional string"
+    },
+    "data": {...}
+}
+</code></pre>
+
+<ul>
+<li>
+<strong>data</strong>: JSON response, if any</li>
+<li>
+<strong>meta</strong>: Meta information about the request and response
+
+<ul>
+<li>
+<strong>status</strong>: HTTP sattus code. In JSONP, the HTTP status code will always be 200 and <code>status</code> will hold the real HTTP status code value</li>
+</ul>
+</li>
+<li>
+<strong>error</strong>: Error section if error:
+
+<ul>
+<li>
+<strong>type</strong>: error type (see below)</li>
+<li>
+<strong>data</strong>: error details, optional. I.e., for Bad Requests, contains validation errors.</li>
+<li>
+<strong>message</strong>: optional message describing the error. I.e. in case of Internal 500 error, this field could be set.</li>
+</ul>
+</li>
+</ul>
+
+<p>Here is a list of error <code>type</code> and its matching <code>status</code> code:</p>
+
+<ul>
+<li>status: <code>401</code>, type: <strong>authc</strong>: Authentication error.</li>
+<li>status: <code>403</code>, type: <strong>authz</strong>: Although authentication succeeded, the acting user is not allowed to see this information due to privacy restrictions.</li>
+<li>status: <code>400</code>, type: <strong>request</strong>: A required parameter was missing or a parameter was malformed. This is also used if the resource ID in the path is incorrect. Also case where no Access Token is provided.</li>
+<li>status: <code>404</code>, type: <strong>notfound</strong>: The requested path does not exist.</li>
+<li>status: <code>405</code>, type: <strong>method</strong>: The method (GET, PUT, POST, DELETE) set for the request is not allowed for the requested path..</li>
+<li>status: <code>200</code>, type: <strong>deprecated</strong>: Something about this request is using deprecated functionality, or the response format may be about to change.</li>
+<li>status: <code>500</code>, type: <strong>server</strong>: Server is currently experiencing issues. Check <a href="http://status.guestful.com">status.guestful.com</a> for updates.</li>
+<li>status: <code>???</code>, type: <strong>other</strong>: For any other status code, the type will be other</li>
+</ul>
+
+<p>In case of a <code>BAD REQUEST</code>, the response will look like this:</p>
+
+<pre><code>{
+    "meta": {
+        "status": 400
+    },
+    "error": {
+        "type": "request",
+        "data": [ {"key": "firstName", "type": "required"}, {"key": "lastName", "type": "invalid"} ],
+    }
+}
+</code></pre>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">jaxrs-filter-jsend maintained by <a href="https://github.com/guestful">guestful</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-55953377-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+
+  </body>
+</html>
