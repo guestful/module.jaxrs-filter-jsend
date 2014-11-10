@@ -1,6 +1,15 @@
 Guestful :: Module :: JAX-RX Filter Jsend
 =========================================
 
+JAX-RX Filter to support a modified [Jsend](http://labs.omniti.com/labs/jsend) body wrapper through a `@Jsend` annotation
+
+Checkout last version [here](https://bintray.com/guestful/maven/guestful.module.jaxrs-filter-jsend/view)
+
+[![Build Status](https://drone.io/github.com/guestful/module.jaxrs-filter-jsend/status.png)](https://drone.io/github.com/guestful/module.jaxrs-filter-jsend/latest)
+
+Setup
+-----
+
 Add in your POM:
 
 ```
@@ -21,13 +30,6 @@ and
     <version>?</version>
 </dependency>
 ```
-
-Checkout last version [here](https://bintray.com/guestful/maven/guestful.module.jaxrs-filter-jsend/view)
-
-[![Build Status](https://drone.io/github.com/guestful/module.jaxrs-filter-jsend/status.png)](https://drone.io/github.com/guestful/module.jaxrs-filter-jsend/latest)
-
-Setup
------
 
 In your resouce config:
 
