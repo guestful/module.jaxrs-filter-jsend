@@ -60,7 +60,7 @@ public class JsendExceptionMapper implements ExceptionMapper<Throwable> {
             Object ct = response.getMetadata().getFirst(HttpHeaders.CONTENT_TYPE);
             MediaType mt = ct == null ? null : MediaType.valueOf(ct.toString());
             Throwable t = e.getCause() == null ? e : e.getCause();
-            response = infos != null && (mt == null || MediaType.APPLICATION_JSON_TYPE.isCompatible(mt)) ?
+            response = mt == null || MediaType.APPLICATION_JSON_TYPE.isCompatible(mt) ?
                 JSendFeature.wrapResponse(requestProvider.get(), response, t, null) :
                 response;
             logStackTrace = e.getCause() != null;
